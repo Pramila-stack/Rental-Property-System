@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Pending Bookings</h1>
+
+{% for booking in bookings %}
+
+<div style="border:1px solid #ccc; padding:10px; margin:10px;">
+    <p>User: {{ booking.user.username }}</p>
+    <p>Property: {{ booking.property.title }}</p>
+    <p>Dates: {{ booking.start_date }} - {{ booking.end_date }}</p>
+    <p>Status: {{ booking.status }}</p>
+    
+    <form method="POST" action="{% url 'approve-booking' booking.pk %}">
+        {% csrf_token %}
+        <button type="submit">Approve</button>
+    </form>
+    
+    <form method="POST" action="{% url 'reject-booking' booking.pk %}">
+        {% csrf_token %}
+        <button type="submit">Reject</button>
+    </form>
+</div>
+
+{% endfor %}
+{% endblock content %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for property in properties %}
+    <div class="col">
+        <div class="card h-100">
+            <a href="{% url 'property-detail' property.pk %}">
+                <img src="{{ property.image.url }}" class="card-img-top" alt="..." height="400" width="400">
+            </a>
+            <div class="card-body">
+                <h2 class="card-title">
+                    <a href="{% url 'property-detail' property.pk %}" class="text-decoration-none fst-italic text-dark">{{ property.title }}</a>
+                </h2>
+                <p class="card-text"><strong>Location:</strong>{{ property.location }}</p>
+                <p class="card-text"><strong>Price per night:</strong>${{ property.price_per_night }}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock content %}

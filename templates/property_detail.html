@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+
+    <div class="col">
+        <div class="card auto">
+            <img src="{{ property.image.url }}" class="card-img-top" alt="..." height="400" width="400">
+            <div class="card-body">
+                <h2 class="card-title">{{ property.title }}</h2>
+                <p class="card-text"><strong>Description:</strong>{{ property.description }}</p>
+                <p class="card-text"><strong>Location:</strong>{{ property.location }}</p>
+                <p class="card-text"><strong>Price per night:</strong>${{ property.price_per_night }}</p>
+            </div>
+        </div>
+        <hr>
+        <h3>Book this property</h3>
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-outline-secondary">Book</button>
+        </form>
+
+        <hr>
+        <h3>Add Reviews</h3>
+        <ul>
+            {% for review in reviews %}
+            <li>
+                <strong>{{ review.user.username }}</strong>-{{ review.rating }}/5
+                <br>
+                {{ review.comment }}
+            </li>
+            {% empty %}
+            <li>No reviews yet.</li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'add-review' property.pk %}" class="btn btn-outline-primary">Add Review</a>
+    </div>
+
+</div>
+
+{% endblock content %}
