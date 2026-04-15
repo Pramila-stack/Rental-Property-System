@@ -61,3 +61,24 @@ So you used:
 dispatch()
 
 
+
+# start_date__lt=end
+
+👉 Existing booking starts before new booking ends
+
+🔹 Part 2
+# end_date__gt=start
+
+👉 Existing booking ends after new booking starts
+
+# 🧠 Why form_invalid(form)?
+
+👉 Because the booking should NOT be saved
+
+and you want to:
+
+❌ Stop saving the booking
+🔁 Show the same page again
+📋 Show form errors + keep user input
+
+

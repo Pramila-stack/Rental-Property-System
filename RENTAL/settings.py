@@ -129,3 +129,14 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "pramilatmg.np@gmail.com"
 EMAIL_HOST_PASSWORD = "ogte tvgd ylbu vymk"
+
+
+from django.contrib import messages
+
+MESSAGE_TAGS = {
+    messages.DEBUG: 'secondary',
+    messages.INFO: 'info',
+    messages.SUCCESS:'success',
+    messages.WARNING:'warning',
+    messages.ERROR:'danger'
+}

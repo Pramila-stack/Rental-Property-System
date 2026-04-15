@@ -3,9 +3,16 @@ from django.views.generic import ListView, DetailView, FormView,CreateView,View,
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import login
 from django.shortcuts import redirect
-from .models import Booking, Property
+from .models import Booking, Property, Review
 from .forms import BookingForm, ReviewForm, SignupForm
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
+from django.contrib import messages
+
+from django.utils.decorators import method_decorator
+from django.contrib.admin.views.decorators import staff_member_required
+
+
 
 
 class SignupView(CreateView):
@@ -43,7 +50,7 @@ class PropertyDetailView(LoginRequiredMixin, DetailView, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         property = self.object
-        context['reviews'] = property.reviews.filter(approved=True)
+        context['reviews'] = property.reviews.all()
         return context
 
     # ✅ handle POST (booking)
@@ -60,7 +67,21 @@ class PropertyDetailView(LoginRequiredMixin, DetailView, FormView):
         booking.user = self.request.user
         booking.property = self.object
 
-        days = (booking.end_date - booking.start_date).days
+        start = booking.start_date
+        end = booking.end_date
+
+        conflict = Booking.objects.filter(
+            property = self.object,
+            status = "approved"
+        ).filter(
+            Q(start_date__lt=end) & Q(end_date__gt=start)
+        ).exists()
+
+        if conflict:
+            messages.error(self.request,"This property has already been booked for given dates.")
+            return self.form_invalid(form)
+
+        days = (end-start).days
         booking.total_price = days * self.object.price_per_night
 
         booking.save()  # admin will approve later
@@ -73,6 +94,11 @@ class BookingSuccessView(TemplateView):
 class AddReviewView(LoginRequiredMixin, FormView):
     template_name = 'add_review.html'
     form_class = ReviewForm
+
+    def get_queryset(self):
+        return Review.objects.all().order_by("id")
+
+    
 
     def dispatch(self, request, *args, **kwargs):
         self.property = get_object_or_404(
@@ -94,25 +120,32 @@ class AddReviewView(LoginRequiredMixin, FormView):
         context = super().get_context_data(**kwargs)
         context['property'] = self.property
         return context
-    
+
+@method_decorator(staff_member_required,name="dispatch")
 class AdminBookingListView(ListView):
     model = Booking
     template_name = "bookings.html"
     context_object_name = "bookings"
 
     def get_queryset(self):
-        return Booking.objects.filter(status="pending")
-    
+        return Booking.objects.all().order_by("-id")
+
+ 
+@method_decorator(staff_member_required,name="dispatch")
 class ApproveBookingView(View):
     def post(self,request,pk):
         booking = get_object_or_404(Booking,pk=pk)
         booking.status = "approved"
         booking.save()
+
+        messages.success(request,"Booking approved successfully.")
         return redirect("admin-bookings")
     
+@method_decorator(staff_member_required,name="dispatch")
 class RejectBookingView(View):
     def post(self,request,pk):
         booking = get_object_or_404(Booking,pk=pk)
         booking.status = "rejected"
         booking.save()
+        messages.error(request,"Booking rejected successfully.")
         return redirect("admin-bookings")

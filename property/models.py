@@ -36,6 +36,14 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"{self.user.username} -> {self.property.title}"
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['property', 'start_date', 'end_date'],
+                name='unique_booking_dates'
+            )
+        ]
 
 class Review(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,related_name="reviews")
